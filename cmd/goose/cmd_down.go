@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/brianstarke/goose/lib/goose"
+	"github.com/getbread/goose/lib/goose"
 )
 
 var downCmd = &Command{

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/brianstarke/goose/lib/goose"
+	"github.com/getbread/goose/lib/goose"
 )
 
 var dbVersionCmd = &Command{
