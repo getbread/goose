@@ -399,7 +399,7 @@ func GetEarliestSharedDBVersion(firstPath string, secondPath string) (int64, err
 		downTo = secondVersions[len(secondVersions) - 1]
 	}
 
-	for i := 0; i < maxLen; i++ {
+	for i := 1; i < maxLen; i++ {
 		if firstVersions[i] != secondVersions[i] {
 			downTo = firstVersions[i - 1]
 		}
