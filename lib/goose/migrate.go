@@ -392,11 +392,11 @@ func GetEarliestSharedDBVersion(firstPath string, secondPath string) (int64, err
 	svLen := len(secondVersions)
 
 	maxLen := fvLen
-	downTo := firstVersions[len(firstVersions) - 1]
+	downTo := firstVersions[lfvLen - 1]
 
 	if svLen < fvLen {
 		maxLen = svLen
-		downTo = secondVersions[len(secondVersions) - 1]
+		downTo = secondVersions[svLen - 1]
 	}
 
 	for i := 1; i < maxLen; i++ {
