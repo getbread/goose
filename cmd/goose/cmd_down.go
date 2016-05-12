@@ -35,6 +35,7 @@ func downRun(cmd *Command, args ...string) {
 		if err != nil {
 			log.Fatal(fmt.Sprintf("Failed to determine the lowest migration number between %s and %s due to error: %s", args[0], args[1], err.Error()))
 		}
+		conf.MigrationsDir = args[0]
 
 	} else if len(args) > 0 {
 		previous, err = strconv.ParseInt(args[0], 10, 64)
