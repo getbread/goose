@@ -339,6 +339,75 @@ func GetMostRecentDBVersion(dirpath string) (version int64, err error) {
 	return
 }
 
+func GetEarliestSharedDBVersion(firstPath string, secondPath string) (int64, error) {
+	firstVersions := []int{}
+	secondVersions := []int{}
+
+	err := filepath.Walk(firstPath, func(name string, info os.FileInfo, walkerr error) error {
+		if walkerr != nil {
+			return walkerr
+		}
+
+		if !info.IsDir() {
+			if v, e := NumericComponent(name); e == nil {
+				firstVersions = append(firstVersions, int(v))
+			} else if e != nil {
+				return e
+			}
+		}
+
+		return nil		
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	err = filepath.Walk(secondPath, func(name string, info os.FileInfo, walkerr error) error {
+		if walkerr != nil {
+			return walkerr
+		}
+
+		if !info.IsDir() {
+			if v, e := NumericComponent(name); e == nil {
+				secondVersions = append(secondVersions, int(v))
+
+			} else if e != nil {
+				return e
+			}
+		}
+
+		return nil		
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	sort.Ints(firstVersions)
+	sort.Ints(secondVersions)
+
+	// Assumes both directories have the same first version number.
+	fvLen := len(firstVersions)
+	svLen := len(secondVersions)
+
+	maxLen := fvLen
+	downTo := firstVersions[lfvLen - 1]
+
+	if svLen < fvLen {
+		maxLen = svLen
+		downTo = secondVersions[svLen - 1]
+	}
+
+	for i := 1; i < maxLen; i++ {
+		if firstVersions[i] != secondVersions[i] {
+			downTo = firstVersions[i - 1]
+		}
+	}
+
+	return int64(downTo), nil
+}
+
 func CreateMigration(name, migrationType, dir string, t time.Time) (path string, err error) {
 
 	if migrationType != "go" && migrationType != "sql" {
