@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/getbread/goose/lib/goose"
@@ -23,10 +24,10 @@ func upRun(cmd *Command, args ...string) {
 
 	target, err := goose.GetMostRecentDBVersion(conf.MigrationsDir)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("Failed to read the most recent database version from %s due to error: %s", conf.MigrationsDir, err.Error()))
 	}
 
 	if err := goose.RunMigrations(conf, conf.MigrationsDir, target); err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("Failed to run the goose migrations on %v with directory %s and target %d due to error: %s", conf, conf.MigrationsDir, target, err.Error()))
 	}
 }

@@ -35,18 +35,18 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 
 	f, err := yaml.ReadFile(cfgFile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to read configuration file %s due to error: %s", cfgFile, err.Error())
 	}
 
 	drv, err := f.Get(fmt.Sprintf("%s.driver", env))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to read %s.driver from configuration file %s due to error: %s", env, cfgFile, err.Error())
 	}
 	drv = os.ExpandEnv(drv)
 
 	open, err := f.Get(fmt.Sprintf("%s.open", env))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to read %s.open from configuration file %s due to error: %s", env, cfgFile, err.Error())
 	}
 	open = os.ExpandEnv(open)
 
