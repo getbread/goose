@@ -151,6 +151,7 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	for _, query := range splitSQLStatements(f, direction) {
 		if _, err = txn.Exec(query); err != nil {
 			txn.Rollback()
+			log.Printf("Failed to execute statement:\n%s\n", query)
 			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
 			return err
 		}
