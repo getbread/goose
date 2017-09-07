@@ -1,4 +1,4 @@
-# goose
+# goose 
 
 goose is a database migration tool.
 
