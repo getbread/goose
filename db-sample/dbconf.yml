@@ -15,7 +15,7 @@ customimport:
     driver: customdriver
     open: customdriver open
     import: github.com/custom/driver
-    dialect: mysql
+    dialect: postgres
 
 environment_variable_config:
     driver: $DB_DRIVER
