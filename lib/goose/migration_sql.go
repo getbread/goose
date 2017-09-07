@@ -165,7 +165,7 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 		}
 
 		if _, err := txn.Exec(conf.Driver.Dialect.insertVersionSql(conf.Table), v, direction); err != nil {
-			log.Printf("error finalizing migration %s, rolling back tx. (%v)", filepath.Base(scriptFile), err)
+			log.Printf("error finalizing migration %s, direction=%t, rolling back tx. (%v)", filepath.Base(scriptFile), direction, err)
 			txn.Rollback()
 			return err
 		}
@@ -181,7 +181,7 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 		}
 	}
 	if _, err := db.Exec(conf.Driver.Dialect.insertVersionSql(conf.Table), v, direction); err != nil {
-		log.Printf("error finalizing migration %s. This migration was executed WITHOUT a DB transaction because '-- +goose NO TRANSACTION' was specified and so THE DATABASE MAY NOW BE IN AN INCONSISTENT STATE! (%v)", filepath.Base(scriptFile), err)
+		log.Printf("error finalizing migration %s, direction=%t, This migration was executed WITHOUT a DB transaction because '-- +goose NO TRANSACTION' was specified and so THE DATABASE MAY NOW BE IN AN INCONSISTENT STATE! (%v)", filepath.Base(scriptFile), direction, err)
 		return err
 	}
 
