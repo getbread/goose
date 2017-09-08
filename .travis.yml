@@ -1,0 +1,11 @@
+dist: trusty
+sudo: required
+go:
+  - 1.7.x
+go_import_path: github.com/getbread/goose
+language: go
+
+script:
+  - |
+    set -e
+    go test ./...
