@@ -1,7 +1,7 @@
 dist: trusty
 sudo: required
 go:
-  - 1.7.x
+  - 1.9.x
 go_import_path: github.com/getbread/goose
 language: go
 
