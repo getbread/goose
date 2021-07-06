@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"fmt"
 )
 
 const sqlCmdPrefix = "-- +goose "
@@ -58,17 +59,30 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 	for scanner.Scan() {
 
 		line := scanner.Text()
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
 
 		// handle any goose-specific commands
 		if strings.HasPrefix(line, sqlCmdPrefix) {
 			cmd := strings.TrimSpace(line[len(sqlCmdPrefix):])
+			bufSize := buf.Len()
+			if bufSize < 0 {
+				fmt.Println("")
+			}
 			switch cmd {
 			case "Up":
+				if buf.Len() > 0 {
+					log.Fatalf(`Cannot start a new section without terminating previous statement with a semi-colon.\nPrevious statement: "%s"`, buf.String())
+				}
 				directionIsActive = (direction == true)
 				upSections++
 				break
 
 			case "Down":
+				if buf.Len() > 0 {
+					log.Fatalf(`Cannot start a new section without terminating previous statement with a semi-colon. Previous statement: "%s"`, buf.String())
+				}
 				directionIsActive = (direction == false)
 				downSections++
 				break
