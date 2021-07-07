@@ -57,6 +57,12 @@ func RunMigrations(conf *DBConf, migrationsDir string, target int64) (err error)
 		return err
 	}
 
+	if pendingVersions, err := GetMissedMigrations(conf, db, current); err != nil {
+		return fmt.Errorf("while calling GetMissedMigrations: %w", err)
+	} else if len(pendingVersions) > 0 {
+		log.Fatalf("Local Migrations exists {%v} that are before the current version %d. Cannot proceed.", pendingVersions, current)
+	}
+
 	migrations, err := CollectMigrations(migrationsDir, current, target)
 	if err != nil {
 		return err
@@ -94,7 +100,49 @@ func RunMigrations(conf *DBConf, migrationsDir string, target int64) (err error)
 	return nil
 }
 
-// collect all the valid looking migration scripts in the
+func GetMissedMigrations(conf *DBConf, db *sql.DB, current int64) ([]int64, error) {
+	localMigrationFiles, err := CollectMigrations(conf.MigrationsDir, int64(0), current)
+	if err != nil {
+		return []int64{}, fmt.Errorf("while collecting current migrations: %w", err)
+	}
+
+	rows, err := conf.Driver.Dialect.dbVersionQuery(conf.Table, db)
+	if err != nil {
+		if err == ErrTableDoesNotExist {
+			return []int64{}, createVersionTable(conf, db)
+		}
+		return []int64{}, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error while closing dbVersionQuery rows for GetMissedMigrations: %v", err)
+		}
+	}()
+
+	dbMigrationVersionSet := make(map[int64]struct{})
+	for rows.Next() {
+		var record MigrationRecord
+		if err := rows.Scan(&record.VersionId, &record.IsApplied); err != nil {
+			return []int64{}, fmt.Errorf("while scanning Version Query rows: %w", err)
+		}
+
+		if record.IsApplied {
+			dbMigrationVersionSet[record.VersionId] = struct{}{}
+		}
+	}
+
+	missing := make([]int64, 0)
+	for _, local := range localMigrationFiles {
+		_, hasRecord := dbMigrationVersionSet[local.Version]
+		if !hasRecord {
+			missing = append(missing, local.Version)
+		}
+	}
+
+	return missing, nil
+}
+
+// CollectMigrations collects all the valid looking migration scripts in the
 // migrations folder, and key them by version
 func CollectMigrations(dirpath string, current, target int64) (m []*Migration, err error) {
 
